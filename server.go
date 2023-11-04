@@ -87,7 +87,7 @@ func (this *Server) Handler(conn net.Conn) {
 		case <-isActive:
 			// current user is active, should reset timer
 			// do nothing, to active select and update timer
-		case <-time.After(time.Second * 10):
+		case <-time.After(time.Minute * 5):
 			// has time out
 			user.SendMsg("you are removed")
 			// destory resource

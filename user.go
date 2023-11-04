@@ -75,6 +75,24 @@ func (this *User) DoMessage(msg string) {
 			this.SendMsg("rename " + this.Name + "success")
 		}
 
+	} else if len(msg) > 4 && msg[:3] == "to|" {
+		// message format: to|李华|msg content
+		remoteName := strings.Split(msg, "|")[1]
+		if remoteName == "" {
+			this.SendMsg("message format is incorrect, please use \"to|李华|msg\" format.\n")
+			return
+		}
+		remoteUser, ok := this.server.OnlineMap[remoteName]
+		if !ok {
+			this.SendMsg("user not exist \n")
+			return
+		}
+		msgContent := strings.Split(msg, "|")[2]
+		if msgContent == "" {
+			this.SendMsg("messageContent is empty.\n")
+			return
+		}
+		remoteUser.SendMsg("来自" + this.Name + "的问候：" + msgContent)
 	} else {
 		this.server.BroadCast(this, msg)
 	}
