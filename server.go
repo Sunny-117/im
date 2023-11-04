@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -51,6 +52,10 @@ func (this *Server) Handler(conn net.Conn) {
 	user := NewUser(conn, this)
 
 	user.Online()
+
+	// channel of listening  if user is active
+	isActive := make(chan bool)
+
 	// accept client message
 	go func() {
 		buf := make([]byte, 4096)
@@ -70,11 +75,29 @@ func (this *Server) Handler(conn net.Conn) {
 
 			// user module process for msg
 			user.DoMessage(msg)
+
+			// user's any msg is considered he/she is active
+			isActive <- true
 		}
 	}()
 
 	// 当前handler阻塞
-	select {}
+	for {
+		select {
+		case <-isActive:
+			// current user is active, should reset timer
+			// do nothing, to active select and update timer
+		case <-time.After(time.Second * 10):
+			// has time out
+			user.SendMsg("you are removed")
+			// destory resource
+			close(user.C)
+			// close conn
+			conn.Close()
+			// exit current handler
+			return // or runtime.Goexit()
+		}
+	}
 }
 
 // start dev
