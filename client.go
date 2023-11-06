@@ -61,6 +61,46 @@ func (client *Client) menu() bool {
 
 }
 
+func (client *Client) SelectUsers() {
+	sendMsg := "who\n"
+	_, err := client.conn.Write([]byte(sendMsg))
+	if err != nil {
+		fmt.Println("conn write error")
+		return
+	}
+}
+
+func (client *Client) PrivateChat() {
+	var remoteName string
+	var chatMsg string
+	client.SelectUsers()
+
+	fmt.Println("please input your friend's name, exit.")
+
+	fmt.Scanln(&remoteName)
+	for remoteName != "exit" {
+		fmt.Println("please input msg content, exit.")
+		fmt.Scanln(&chatMsg)
+
+		for chatMsg != "exit" {
+			if len(chatMsg) != 0 {
+				sendMsg := "to|" + remoteName + "|" + chatMsg + "\n\n"
+				_, err := client.conn.Write([]byte(sendMsg))
+				if err != nil {
+					fmt.Println("conn.Write error: ", err)
+					break
+				}
+			}
+			chatMsg = ""
+			fmt.Println("please input msg content, exit.")
+			fmt.Scanln(&chatMsg)
+		}
+		client.SelectUsers()
+		fmt.Println("please input msg content, exit.")
+		fmt.Scanln(&chatMsg)
+	}
+}
+
 func (client *Client) PublicChat() {
 	var chatMsg string
 	fmt.Println("please input your message, exit.")
@@ -104,7 +144,7 @@ func (client *Client) Run() {
 			client.PublicChat()
 			break
 		case 2:
-			fmt.Println("私聊模式")
+			client.PrivateChat()
 			break
 		case 3:
 			client.UpdateName()
