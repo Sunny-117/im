@@ -60,6 +60,28 @@ func (client *Client) menu() bool {
 	}
 
 }
+
+func (client *Client) PublicChat() {
+	var chatMsg string
+	fmt.Println("please input your message, exit.")
+	fmt.Scanln(&chatMsg)
+	for chatMsg != "exit" {
+		// message is not empty
+		if len(chatMsg) != 0 {
+			sendMsg := chatMsg + "\n"
+			_, err := client.conn.Write([]byte(sendMsg))
+			if err != nil {
+				fmt.Println("conn.Write error: ", err)
+				break
+			}
+		}
+		chatMsg = ""
+		fmt.Println("please input your message, exit.")
+		fmt.Scanln(&chatMsg)
+	}
+
+}
+
 func (client *Client) UpdateName() bool {
 	fmt.Println("please input your name")
 	fmt.Scanln(&client.Name)
@@ -79,7 +101,7 @@ func (client *Client) Run() {
 		}
 		switch client.flag {
 		case 1:
-			fmt.Println("公聊模式")
+			client.PublicChat()
 			break
 		case 2:
 			fmt.Println("私聊模式")
